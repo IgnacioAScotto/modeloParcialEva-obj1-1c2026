@@ -1,0 +1,74 @@
+import nervMios.*
+import evasMios.*
+import pilotosMios.*
+
+
+describe "estos son los test minimos de evangelion" {
+  test "el EVA-01 no puede usarse mas de 3 veces sin recargarse" {
+        nerv.registrarPiloto(asuka)
+        nerv.registrarEva(eva01)
+
+        nerv.sincronizarEvaConPiloto(eva01, asuka)
+        nerv.sincronizarEvaConPiloto(eva01, asuka)
+        nerv.sincronizarEvaConPiloto(eva01, asuka)
+
+        assert.notThat(eva01.energia() > 30)
+  }
+
+  test "En el modo ataque, el eva-02 otorga 3 ptos de entrenamiento y consume 20 de energia" {
+    nerv.registrarPilotos([asuka, shinji, rei])
+    nerv.registrarEva(eva02)
+
+    eva02.cambiarModo(ataque)
+    nerv.sincronizarEvaConPiloto(eva02, asuka)
+    assert.equals(80, eva02.energia())
+    assert.equals(5 + eva02.puntosQueOtorga(), asuka.puntosDeEntrenamineto())
+  }
+
+  test "Shinji puede sincronizar con el eva 00" {
+    nerv.registrarPiloto(shinji)
+    nerv.registrarEva(eva00)
+    assert.that(shinji.puedeSincronizarCon(eva00))
+  }
+
+  test "rei no puede realizar mas de 5 sincronizaciones en total" {
+    nerv.registrarPiloto(rei)
+    nerv.registrarEvas([eva00, eva01, eva02])
+
+    nerv.sincronizarEvaConPiloto(eva02, rei)
+    nerv.sincronizarEvaConPiloto(eva02, rei)
+    eva02.recargarEnergia(2)
+    nerv.sincronizarEvaConPiloto(eva02, rei)
+    nerv.sincronizarEvaConPiloto(eva02, rei)
+    eva02.recargarEnergia(2)
+    nerv.sincronizarEvaConPiloto(eva02, rei)
+    assert.notThat(rei.puedeSincronizarCon(eva02))
+  }
+
+  test "el calculo del promedio de los ptos de entrenamineto da bien" {
+    nerv.registrarPilotos([asuka, shinji, rei])
+    nerv.registrarEva(eva02)
+
+    eva02.cambiarModo(estandar)
+    nerv.sincronizarEvaConPiloto(eva02, asuka)
+    nerv.sincronizarEvaConPiloto(eva02, asuka)
+    assert.equals(3, nerv.promedioDePuntosPilotos())
+  }
+
+  test "cada eva puede seer sincronizado por al menos un piloto" {
+    nerv.registrarPilotos([asuka, shinji, rei])
+    nerv.registrarEvas([eva00, eva01, eva02])
+
+    assert.that(nerv.evasQueSeSincronizanCon())
+  }
+
+  test "Que Asuka se considere satisfecha" {
+    nerv.registrarPiloto(asuka)
+    nerv.registrarEva(eva00)
+
+    eva00.mejorarCampoAt(20)
+    nerv.sincronizarEvaConPiloto(eva00, asuka)
+
+    assert.that(asuka.estaSatisfecha())
+  }
+}
